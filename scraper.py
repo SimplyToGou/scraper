@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import argparse
 import platform
 import time
+import json
 
 from browsermobproxy import Server
 
@@ -36,7 +37,10 @@ url_sernac = environ.get("URL")
 
 chrome_options = Options()
 chrome_options.add_argument("log-level=3")
-chrome_options.add_argument("--proxy-server={0}".format(proxy.proxy))
+# chrome_options.add_argument("--proxy-server={0}".format(proxy.proxy))
+chrome_options.set_capability(
+                        "goog:loggingPrefs", {"performance": "ALL", "browser": "ALL"}
+)
 
 # Mac
 driver_location = os.path.join(os.getcwd(), 'chromedriver')
@@ -65,7 +69,7 @@ try:
         input_region.send_keys(region)
         input_region.send_keys(Keys.DOWN)
         input_region.send_keys(Keys.ENTER)
-        time.sleep(0.75)
+        time.sleep(1)
 
         selector_comunas = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable(
@@ -83,13 +87,43 @@ try:
         lista_comunas = div_opciones.text.split("\n")
         diccionario_regiones[region] = {}
         for comuna in lista_comunas:
+            input_comunas.click()
+            input_comunas.send_keys(comuna)
+            input_comunas.send_keys(Keys.DOWN)
+            input_comunas.send_keys(Keys.ENTER)
+            time.sleep(0.75)
+            input_comunas.click()
+            input_comunas.send_keys(key_command, "a")
+            input_comunas.send_keys(Keys.BACKSPACE)
+            time.sleep(0.25)
 
             diccionario_regiones[region][comuna] = 0
-
+        input_region.click()
         input_region.send_keys(key_command, "a")
         input_region.send_keys(Keys.BACKSPACE)
         time.sleep(0.5)
     print(diccionario_regiones)
+
+    log_entries = driver.get_log("performance")
+    for entry in log_entries:
+
+        try:
+            obj_serialized: str = entry.get("message")
+            obj = json.loads(obj_serialized)
+            message = obj.get("message")
+            method = message.get("method")
+            if method in ['Network.requestWillBeSentExtraInfo' or 'Network.requestWillBeSent']:
+                try:
+                    for c in message['params']['associatedCookies']:
+                        if c['cookie']['name'] == 'authToken':
+                            bearer_token = c['cookie']['value']
+                except:
+                    pass
+            print(type(message), method)
+            print('--------------------------------------')
+        except Exception as e:
+            raise e from None
+
 
 except Exception as e:
     print(e)
