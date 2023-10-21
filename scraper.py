@@ -11,6 +11,7 @@ import argparse
 import platform
 import time
 import json
+from utils import obtener_id
 
 from browsermobproxy import Server
 
@@ -92,6 +93,8 @@ try:
             input_comunas.send_keys(Keys.DOWN)
             input_comunas.send_keys(Keys.ENTER)
             time.sleep(0.75)
+            obtener_id(driver.get_log("performance"))
+            exit(0)
             input_comunas.click()
             input_comunas.send_keys(key_command, "a")
             input_comunas.send_keys(Keys.BACKSPACE)
@@ -102,11 +105,13 @@ try:
         input_region.send_keys(key_command, "a")
         input_region.send_keys(Keys.BACKSPACE)
         time.sleep(0.5)
+        break
     print(diccionario_regiones)
 
-    log_entries = driver.get_log("performance")
-    for entry in log_entries:
+    # log_entries = driver.get_log("performance")
 
+    """
+    for entry in log_entries:
         try:
             obj_serialized: str = entry.get("message")
             obj = json.loads(obj_serialized)
@@ -121,8 +126,10 @@ try:
                     pass
             print(type(message), method)
             print('--------------------------------------')
+            print(message)
         except Exception as e:
             raise e from None
+    """
 
 
 except Exception as e:
