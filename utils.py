@@ -31,7 +31,7 @@ def tamanio_por_producto():
         resultado.append({str(pid): json.loads(requests.get(url).content)['rangos']})
 
     with open("productos_sizes.json", "w+") as yeison:
-        json.dump(resultado, yeison, indent=4)
+        json.dump({"tamanos":resultado}, yeison, indent=4)
 
 
 
