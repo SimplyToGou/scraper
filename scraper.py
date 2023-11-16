@@ -11,7 +11,7 @@ import argparse
 import platform
 import time
 import json
-from utils import obtener_id
+from utils import obtener_id, obtener_geografia
 
 from browsermobproxy import Server
 
@@ -49,6 +49,7 @@ driver = webdriver.Chrome(options=chrome_options)
 # driver = webdriver.Chrome(options=chrome_options)
 
 try:
+    driver.maximize_window()
     driver.get(url_sernac)
 
     selector_regiones = WebDriverWait(driver, 10).until(
@@ -70,7 +71,7 @@ try:
         input_region.send_keys(region)
         input_region.send_keys(Keys.DOWN)
         input_region.send_keys(Keys.ENTER)
-        time.sleep(1)
+        time.sleep(0.75)
 
         selector_comunas = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable(
@@ -82,7 +83,7 @@ try:
                                         '//*[@id="root"]/div[1]/div[2]/div[2]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/input'))
         )
         input_comunas.click()
-        time.sleep(0.75)
+        time.sleep(0.55)
         div_opciones = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.XPATH, "//body/div[4]")))
         lista_comunas = div_opciones.text.split("\n")
@@ -92,9 +93,8 @@ try:
             input_comunas.send_keys(comuna)
             input_comunas.send_keys(Keys.DOWN)
             input_comunas.send_keys(Keys.ENTER)
-            time.sleep(0.75)
+            time.sleep(0.55)
             obtener_id(driver.get_log("performance"))
-            exit(0)
             input_comunas.click()
             input_comunas.send_keys(key_command, "a")
             input_comunas.send_keys(Keys.BACKSPACE)
@@ -104,8 +104,7 @@ try:
         input_region.click()
         input_region.send_keys(key_command, "a")
         input_region.send_keys(Keys.BACKSPACE)
-        time.sleep(0.5)
-        break
+        time.sleep(0.3)
     print(diccionario_regiones)
 
     # log_entries = driver.get_log("performance")
@@ -130,6 +129,11 @@ try:
         except Exception as e:
             raise e from None
     """
+
+    nfo = obtener_geografia()
+    with open("idcomunas.json", 'w+') as yeison:
+        json.dump(nfo, yeison, indent=4)
+
 
 
 except Exception as e:
