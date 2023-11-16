@@ -21,17 +21,17 @@ def obtener_geografia():
 
 
 def tamanio_por_producto():
-    resultado = []
+    resultado = {}
     with open("productos.json", "r") as archivo:
         productos = json.load(archivo)
     lista_ids = [x["id"] for x in productos["subcategorias"]]
 
     for pid in lista_ids:
         url = f"https://api.observatorio.sernac.cl/api/v1/subcategorias/{pid}/rangos"
-        resultado.append({str(pid): json.loads(requests.get(url).content)['rangos']})
+        resultado[str(pid)] = json.loads(requests.get(url).content)['rangos']
 
     with open("productos_sizes.json", "w+") as yeison:
-        json.dump({"tamanos":resultado}, yeison, indent=4)
+        json.dump(resultado, yeison, indent=4)
 
 
 
